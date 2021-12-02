@@ -458,6 +458,7 @@ org\keycloak\vault\AbstractVaultProvider.class
 org\keycloak\partialimport\ClientRolesPartialImport$1.class
 org\keycloak\services\resources\admin\AdminAuth$Resource.class
 org\keycloak\authentication\AuthenticationProcessor$Result.class
+org\keycloak\forms\account\freemarker\model\AdditionalAuthBean.class
 org\keycloak\utils\RegexUtils.class
 org\keycloak\authentication\authenticators\conditional\ConditionalAuthenticator.class
 org\keycloak\protocol\oidc\mappers\GroupMembershipMapper.class

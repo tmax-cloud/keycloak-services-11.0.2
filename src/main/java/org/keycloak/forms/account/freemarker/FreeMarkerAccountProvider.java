@@ -20,23 +20,13 @@ import org.jboss.logging.Logger;
 import org.keycloak.events.Event;
 import org.keycloak.forms.account.AccountPages;
 import org.keycloak.forms.account.AccountProvider;
-import org.keycloak.forms.account.freemarker.model.AccountBean;
-import org.keycloak.forms.account.freemarker.model.AccountFederatedIdentityBean;
-import org.keycloak.forms.account.freemarker.model.ApplicationsBean;
-import org.keycloak.forms.account.freemarker.model.AuthorizationBean;
-import org.keycloak.forms.account.freemarker.model.FeaturesBean;
-import org.keycloak.forms.account.freemarker.model.LogBean;
-import org.keycloak.forms.account.freemarker.model.PasswordBean;
-import org.keycloak.forms.account.freemarker.model.RealmBean;
-import org.keycloak.forms.account.freemarker.model.ReferrerBean;
-import org.keycloak.forms.account.freemarker.model.SessionsBean;
-import org.keycloak.forms.account.freemarker.model.TotpBean;
-import org.keycloak.forms.account.freemarker.model.UrlBean;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
-import org.keycloak.models.UserSessionModel;
+import org.keycloak.forms.account.freemarker.model.*;
+import org.keycloak.forms.login.freemarker.LoginFormsUtil;
+import org.keycloak.forms.login.freemarker.model.IdentityProviderBean;
+import org.keycloak.models.*;
+import org.keycloak.models.credential.PasswordCredentialModel;
 import org.keycloak.models.utils.FormMessage;
+import org.keycloak.services.resources.account.AccountFormService;
 import org.keycloak.services.util.CacheControlUtil;
 import org.keycloak.theme.FreeMarkerException;
 import org.keycloak.theme.FreeMarkerUtil;
@@ -162,6 +152,19 @@ public class FreeMarkerAccountProvider implements AccountProvider {
         attributes.put("account", new AccountBean(user, profileFormData));
 
         switch (page) {
+            //FIXME : by taegeon_woo
+            case ACCOUNT:
+                attributes.put("password", new PasswordBean(AccountFormService.isPasswordSet(session, realm, user)));
+//                attributes.put("password", new PasswordBean(session.userCredentialManager().isConfiguredFor(realm, user, PasswordCredentialModel.TYPE)));
+                attributes.put("federatedIdentity", new AccountFederatedIdentityBean(session, realm, user, uriInfo.getBaseUri(), stateChecker));
+                break;
+            case AGREEMENT:
+                attributes.put("agreement", new AccountBean(user, profileFormData));
+                break;
+            case ADDITIONAL_AUTH:
+                attributes.put("additionalAuth", new AdditionalAuthBean(user, session, realm));
+                break;
+            //FIXME : by taegeon_woo
             case TOTP:
                 attributes.put("totp", new TotpBean(session, realm, user, uriInfo.getRequestUriBuilder()));
                 break;

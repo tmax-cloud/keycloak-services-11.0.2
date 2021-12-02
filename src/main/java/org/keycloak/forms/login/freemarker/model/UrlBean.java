@@ -114,4 +114,11 @@ public class UrlBean {
         URI uri = Urls.themeRoot(baseURI);
         return uri.getPath() + "/common/keycloak";
     }
+
+    //FIXME : by taegeon_woo
+    public String getSelectedTheme() {
+        return theme.getName();
+    }
+    //FIXME : by taegeon_woo
+
 }

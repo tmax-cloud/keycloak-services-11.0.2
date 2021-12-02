@@ -70,9 +70,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-server-spi-private</artifactId>
-            <scope>provided</scope>
+            <groupId>com.tmax.hyperauth</groupId>
+            <artifactId>server-spi-private</artifactId>
+            <version>11.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>

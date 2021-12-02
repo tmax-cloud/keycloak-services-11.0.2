@@ -51,6 +51,13 @@ public class IdpConfirmLinkAuthenticator extends AbstractIdpAuthenticator {
         }
 
         ExistingUserInfo duplicationInfo = ExistingUserInfo.deserialize(existingUserInfo);
+
+        //FIXME : by taegeon_woo
+        context.setUser(context.getSession().users().getUserById(duplicationInfo.getExistingUserId(), context.getRealm()));
+        authSession.setAuthNote("isBrokerLogin", "true");
+        authSession.setAuthNote("brokerVendor", brokerContext.getIdpConfig().getAlias());
+        //FIXME : by taegeon_woo
+
         Response challenge = context.form()
                 .setStatus(Response.Status.OK)
                 .setAttribute(LoginFormsProvider.IDENTITY_PROVIDER_BROKER_CONTEXT, brokerContext)

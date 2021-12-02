@@ -99,12 +99,21 @@ public class VerifyEmailActionTokenHandler extends AbstractActionTokenHander<Ver
 
         event.success();
 
+        //FIXME: by taegeon_woo
+        token.setCompoundOriginalAuthenticationSessionId(token.getCompoundAuthenticationSessionId());
+        //FIXME: by taegeon_woo
+
         if (token.getCompoundOriginalAuthenticationSessionId() != null) {
             AuthenticationSessionManager asm = new AuthenticationSessionManager(tokenContext.getSession());
             asm.removeAuthenticationSession(tokenContext.getRealm(), authSession, true);
 
             return tokenContext.getSession().getProvider(LoginFormsProvider.class)
                     .setAuthenticationSession(authSession)
+                    //FIXME: by taegeon_woo
+                    .setAttribute("brokerVendor", tokenContext.getAuthenticationSession().getAuthNote("brokerVendor"))
+                    .setAttribute("brokerEmail", tokenContext.getAuthenticationSession().getAuthNote("brokerEmail"))
+                    .setAttribute("isBrokerLogin", tokenContext.getAuthenticationSession().getAuthNote("isBrokerLogin"))
+                    //FIXME: by taegeon_woo
                     .setSuccess(Messages.EMAIL_VERIFIED)
                     .createInfoPage();
         }

@@ -29,7 +29,7 @@ import static org.jboss.logging.Logger.Level.WARN;
 /**
  * Warning this class consists of generated code.
  */
-@Generated(value = "org.jboss.logging.processor.generator.model.MessageLoggerImplementor", date = "2021-02-23T16:52:26+0900")
+@Generated(value = "org.jboss.logging.processor.generator.model.MessageLoggerImplementor", date = "2021-12-02T18:14:19+0900")
 public class ServicesLogger_$logger extends DelegatingBasicLogger implements ServicesLogger, BasicLogger, Serializable {
     private static final long serialVersionUID = 1L;
     private static final String FQCN = ServicesLogger_$logger.class.getName();

@@ -113,7 +113,18 @@ public class UpdatePassword implements RequiredActionProvider, RequiredActionFac
             context.challenge(challenge);
             errorEvent.error(Errors.PASSWORD_CONFIRM_ERROR);
             return;
+
+        //FIXME : by taegeon_woo
+        } else if (sameWithOldPW(context.getSession(), context.getAuthenticationSession().getAuthenticatedUser().getUsername(), passwordNew)){
+            Response challenge = context.form()
+                    .setAttribute("username", context.getAuthenticationSession().getAuthenticatedUser().getUsername())
+                    .setError(Messages.SAME_PASSWORD)
+                    .createResponse(UserModel.RequiredAction.UPDATE_PASSWORD);
+            context.challenge(challenge);
+            errorEvent.error(Errors.PASSWORD_REJECTED);
+            return;
         }
+        //FIXME : by taegeon_woo
 
         try {
             context.getSession().userCredentialManager().updateCredential(context.getRealm(), context.getUser(), UserCredentialModel.password(passwordNew, false));
@@ -134,6 +145,15 @@ public class UpdatePassword implements RequiredActionProvider, RequiredActionFac
                     .createResponse(UserModel.RequiredAction.UPDATE_PASSWORD);
             context.challenge(challenge);
             return;
+        }
+    }
+
+    private boolean sameWithOldPW(KeycloakSession session, String username, String password) {
+        UserCredentialModel cred = UserCredentialModel.password(password);
+        if (session.userCredentialManager().isValid(session.getContext().getRealm(), session.users().getUserByUsername(username, session.getContext().getRealm()), cred)) {
+            return true;
+        } else {
+            return false;
         }
     }
 

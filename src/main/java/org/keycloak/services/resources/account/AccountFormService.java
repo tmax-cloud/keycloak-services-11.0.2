@@ -100,15 +100,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
@@ -282,6 +274,20 @@ public class AccountFormService extends AbstractSecuredLocalService {
         return forwardToPage("password", AccountPages.PASSWORD);
     }
 
+    //FIXME : by taegeon_woo
+    @Path("additionalAuth")
+    @GET
+    public Response additionalAuthPage() {
+        return forwardToPage("additionalAuth", AccountPages.ADDITIONAL_AUTH);
+    }
+
+    @Path("agreement")
+    @GET
+    public Response agreementPage() {
+        return forwardToPage("agreement", AccountPages.AGREEMENT);
+    }
+    //FIXME : by taegeon_woo
+
     @Path("identity")
     @GET
     public Response federatedIdentityPage() {
@@ -371,8 +377,11 @@ public class AccountFormService extends AbstractSecuredLocalService {
             updateUsername(formData.getFirst("username"), user, session);
             updateEmail(formData.getFirst("email"), user, session, event);
 
-            user.setFirstName(formData.getFirst("firstName"));
-            user.setLastName(formData.getFirst("lastName"));
+            //FIXME : by taegeon_woo
+//            user.setFirstName(formData.getFirst("firstName"));
+//            user.setLastName(formData.getFirst("lastName"));
+            user.setAttribute("user_name", Collections.singletonList(formData.getFirst("userNameAttr")));
+            //FIXME : by taegeon_woo
 
             AttributeFormDataProcessor.process(formData, realm, user);
 
@@ -388,6 +397,116 @@ public class AccountFormService extends AbstractSecuredLocalService {
             return account.setError(Response.Status.CONFLICT, mde.getMessage()).setProfileFormData(formData).createResponse(AccountPages.ACCOUNT);
         }
     }
+
+    //FIXME: by taegeon_woo
+    /**
+     * Update Email OTP information.
+     * @param formData
+     * @return
+     */
+    @Path("additionalAuth/emailOtp")
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response emailOTPEnableUpdate(final MultivaluedMap<String, String> formData) {
+        logger.info("EmailOTP Option Update Service!!");
+        if (auth == null) {
+            return login(null);
+        }
+
+        auth.require(AccountRoles.MANAGE_ACCOUNT);
+
+        String action = formData.getFirst("submitAction");
+        if (action != null && action.equals("Cancel")) {
+            setReferrerOnPage();
+            return account.createResponse(AccountPages.ADDITIONAL_AUTH);
+        }
+
+        csrfCheck(formData);
+        UserModel user = auth.getUser();
+        event.event(EventType.UPDATE_PROFILE).client(auth.getClient()).user(auth.getUser());
+
+        try {
+            user.setAttribute("otpEnable", Collections.singletonList(formData.getFirst("otpEnable")));
+            event.success();
+            setReferrerOnPage();
+            logger.info("EmailOTP Option Update Service Success, User [ " + user.getEmail() + " ]");
+
+            return account.setSuccess(Messages.ACCOUNT_UPDATED).createResponse(AccountPages.ADDITIONAL_AUTH);
+        } catch (ReadOnlyException roe) {
+            logger.error("Error Occurred", roe);
+            setReferrerOnPage();
+            return account.setError(Response.Status.BAD_REQUEST, Messages.READ_ONLY_USER).setProfileFormData(formData).createResponse(AccountPages.ACCOUNT);
+        } catch (ModelDuplicateException mde) {
+            logger.error("Error Occurred", mde);
+            setReferrerOnPage();
+            return account.setError(Response.Status.CONFLICT, mde.getMessage()).setProfileFormData(formData).createResponse(AccountPages.ACCOUNT);
+        }
+    }
+
+    public static final String REQUIRED_ACTION_WEBAUTHN_PASSWORDLESS = "webauthn-register-passwordless";
+    public static final String CREDENTIAL_TYPE_WEBAUTHN_PASSWORDLESS = "webauthn-passwordless";
+
+
+    /**
+     * Update Simple Login information.
+     * @param formData
+     * @return
+     */
+    @Path("additionalAuth/simpleLogin")
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response simpleLoginEnableUpdate(final MultivaluedMap<String, String> formData) {
+        logger.info("SimpleLogin Option Update Service!!");
+        if (auth == null) {
+            return login(null);
+        }
+
+        auth.require(AccountRoles.MANAGE_ACCOUNT);
+
+        String action = formData.getFirst("submitAction");
+        if (action != null && action.equals("Cancel")) {
+            setReferrerOnPage();
+            return account.createResponse(AccountPages.ADDITIONAL_AUTH);
+        }
+
+        csrfCheck(formData);
+        UserModel user = auth.getUser();
+        event.event(EventType.UPDATE_PROFILE).client(auth.getClient()).user(auth.getUser());
+
+        try {
+            if (formData.getFirst("simpleLogin") != null && formData.getFirst("simpleLogin").equalsIgnoreCase("true")) {
+                logger.info("Register webauthn-passswordless authenticator Required Action");
+                user.addRequiredAction(REQUIRED_ACTION_WEBAUTHN_PASSWORDLESS);
+            } else {
+                if (user.getRequiredActions().contains(REQUIRED_ACTION_WEBAUTHN_PASSWORDLESS)) {
+                    logger.info("Delete webauthn-passswordless authenticator Required Action");
+                    user.removeRequiredAction(REQUIRED_ACTION_WEBAUTHN_PASSWORDLESS);
+                }
+                if (session.userCredentialManager().getStoredCredentialsByType(realm, user, CREDENTIAL_TYPE_WEBAUTHN_PASSWORDLESS) != null
+                        & session.userCredentialManager().getStoredCredentialsByType(realm, user, CREDENTIAL_TYPE_WEBAUTHN_PASSWORDLESS).size() > 0) {
+                    logger.info("Delete webauthn-passswordless Credential Data");
+                    session.userCredentialManager().disableCredentialType(realm, user, CREDENTIAL_TYPE_WEBAUTHN_PASSWORDLESS); // 필요한지 잘 모르겠음
+                    session.userCredentialManager().getStoredCredentialsByType(realm, user, CREDENTIAL_TYPE_WEBAUTHN_PASSWORDLESS).forEach( cred -> {
+                        session.userCredentialManager().removeStoredCredential(realm, user, cred.getId());
+                    });
+                }
+            }
+            event.success();
+            setReferrerOnPage();
+            logger.info("SimpleLogin Option Update Service Success, User [ " + user.getEmail() + " ]");
+            return account.setSuccess(Messages.ACCOUNT_UPDATED).createResponse(AccountPages.ADDITIONAL_AUTH);
+        } catch (ReadOnlyException roe) {
+            logger.error("Error Occurred", roe);
+            setReferrerOnPage();
+            return account.setError(Response.Status.BAD_REQUEST, Messages.READ_ONLY_USER).setProfileFormData(formData).createResponse(AccountPages.ACCOUNT);
+        } catch (ModelDuplicateException mde) {
+            logger.error("Error Occurred", mde);
+            setReferrerOnPage();
+            return account.setError(Response.Status.CONFLICT, mde.getMessage()).setProfileFormData(formData).createResponse(AccountPages.ACCOUNT);
+        }
+    }
+    //FIXME: by taegeon_woo
+
 
     @Path("sessions")
     @POST
@@ -597,6 +716,15 @@ public class AccountFormService extends AbstractSecuredLocalService {
 
         try {
             session.userCredentialManager().updateCredential(realm, user, UserCredentialModel.password(passwordNew, false));
+
+            // FIXME : by taegeon_woo
+            // Delete UPDATE_PASSWORD Required Action If Exists
+            if(auth.getUser().getRequiredActions().contains(UserModel.RequiredAction.UPDATE_PASSWORD.toString())){
+                logger.info("User [ " + auth.getUser().getUsername() + " ] Delete Update Password Required Action");
+                auth.getUser().removeRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD);
+            }
+            //FIXME : by taegeon_woo
+
         } catch (ReadOnlyException mre) {
             setReferrerOnPage();
             errorEvent.error(Errors.NOT_ALLOWED);

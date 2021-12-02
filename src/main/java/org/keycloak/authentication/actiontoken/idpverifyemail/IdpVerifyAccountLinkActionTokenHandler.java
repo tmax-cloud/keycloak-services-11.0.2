@@ -89,11 +89,20 @@ public class IdpVerifyAccountLinkActionTokenHandler extends AbstractActionTokenH
                     .setAuthenticationSession(authSession)
                     .setSuccess(Messages.CONFIRM_ACCOUNT_LINKING, token.getIdentityProviderUsername(), token.getIdentityProviderAlias())
                     .setAttribute(Constants.TEMPLATE_ATTR_ACTION_URI, confirmUri)
+                    //FIXME: by taegeon_woo
+                    .setAttribute("identityProviderVendor", token.getIdentityProviderAlias())
+                    .setAttribute("identityProviderUserName", token.getIdentityProviderUsername())
+                    .setAttribute("hyperauthUserName", user.getUsername())
+                    //FIXME: by taegeon_woo
                     .createInfoPage();
         }
 
         // verify user email as we know it is valid as this entry point would never have gotten here.
         user.setEmailVerified(true);
+
+        //FIXME: by taegeon_woo
+        token.setOriginalCompoundAuthenticationSessionId(token.getCompoundAuthenticationSessionId());
+        //FIXME: by taegeon_woo
 
         if (token.getOriginalCompoundAuthenticationSessionId() != null) {
             AuthenticationSessionManager asm = new AuthenticationSessionManager(session);
@@ -117,6 +126,11 @@ public class IdpVerifyAccountLinkActionTokenHandler extends AbstractActionTokenH
                     .setAuthenticationSession(authSession)
                     .setSuccess(Messages.IDENTITY_PROVIDER_LINK_SUCCESS, token.getIdentityProviderAlias(), token.getIdentityProviderUsername())
                     .setAttribute(Constants.SKIP_LINK, true)
+                    //FIXME: by taegeon_woo
+                    .setAttribute("identityProviderVendor", token.getIdentityProviderAlias())
+                    .setAttribute("identityProviderUserName", token.getIdentityProviderUsername())
+                    .setAttribute("hyperauthUserName", user.getUsername())
+                    //FIXME: by taegeon_woo
                     .createInfoPage();
         }
 

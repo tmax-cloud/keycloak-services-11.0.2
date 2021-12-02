@@ -65,8 +65,14 @@ public abstract class AbstractUsernameFormAuthenticator extends AbstractFormAuth
         return form.createLoginUsernamePassword();
     }
 
+    //FIXME : By Taegeon_woo for Disabled user Error Message
+    //    protected String tempDisabledError() {
+    //        return Messages.INVALID_USER;
+    //    }
+    //FIXME : By Taegeon_woo
+
     protected String tempDisabledError() {
-        return Messages.INVALID_USER;
+        return Messages.ACCOUNT_TEMPORARILY_DISABLED;
     }
 
     protected Response setDuplicateUserChallenge(AuthenticationFlowContext context, String eventError, String loginFormError, AuthenticationFlowError authenticatorError) {

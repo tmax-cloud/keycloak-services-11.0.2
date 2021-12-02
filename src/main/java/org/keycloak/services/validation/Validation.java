@@ -97,13 +97,16 @@ public class Validation {
             addError(errors, FIELD_USERNAME, Messages.MISSING_USERNAME);
         }
 
-        if (isBlank(formData.getFirst(FIELD_FIRST_NAME))) {
-            addError(errors, FIELD_FIRST_NAME, Messages.MISSING_FIRST_NAME);
-        }
-
-        if (isBlank(formData.getFirst(FIELD_LAST_NAME))) {
-            addError(errors, FIELD_LAST_NAME, Messages.MISSING_LAST_NAME);
-        }
+        //FIXME: by taegeon_woo
+//        By Taegeon_woo for SNS Registeration
+//        if (isBlank(formData.getFirst(FIELD_FIRST_NAME))) {
+//            addError(errors, FIELD_FIRST_NAME, Messages.MISSING_FIRST_NAME);
+//        }
+//
+//        if (isBlank(formData.getFirst(FIELD_LAST_NAME))) {
+//            addError(errors, FIELD_LAST_NAME, Messages.MISSING_LAST_NAME);
+//        }
+        //FIXME: by taegeon_woo
 
         if (isBlank(formData.getFirst(FIELD_EMAIL))) {
             addError(errors, FIELD_EMAIL, Messages.MISSING_EMAIL);

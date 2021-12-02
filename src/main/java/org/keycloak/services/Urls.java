@@ -56,6 +56,16 @@ public class Urls {
         return accountBase(baseUri).path(AccountFormService.class, "accountPage");
     }
 
+    //FIXME : by taegeon_woo
+    public static URI accountAdditionalAuthPage(URI baseUri, String realmName) {
+        return accountBase(baseUri).path(AccountFormService.class, "additionalAuthPage").build(realmName);
+    }
+
+    public static URI accountAgreementPage(URI baseUri, String realmName) {
+        return accountBase(baseUri).path(AccountFormService.class, "agreementPage").build(realmName);
+    }
+    //FIXME : by taegeon_woo
+
     public static URI accountPasswordPage(URI baseUri, String realmName) {
         return accountBase(baseUri).path(AccountFormService.class, "passwordPage").build(realmName);
     }

@@ -28,6 +28,10 @@ public class Templates {
         switch (page) {
             case ACCOUNT:
                 return "account.ftl";
+            case ADDITIONAL_AUTH:
+                return "additionalAuth.ftl";
+            case AGREEMENT:
+                return "agreement.ftl";
             case PASSWORD:
                 return "password.ftl";
             case TOTP:

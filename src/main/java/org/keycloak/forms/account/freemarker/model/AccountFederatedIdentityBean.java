@@ -56,7 +56,6 @@ public class AccountFederatedIdentityBean {
                     continue;
                 }
                 String providerId = provider.getAlias();
-
                 FederatedIdentityModel identity = getIdentity(identities, providerId);
 
                 if (identity != null) {
@@ -139,6 +138,15 @@ public class AccountFederatedIdentityBean {
             return displayName;
         }
 
+        public String getKakaoJsKey(){
+            if (session.users().getUserByUsername("admin", session.realms().getRealmByName("master")) != null
+            && session.users().getUserByUsername("admin", session.realms().getRealmByName("master")).getAttribute("tmax_kakao_api_key")!= null
+            && session.users().getUserByUsername("admin", session.realms().getRealmByName("master")).getAttribute("tmax_kakao_api_key").size() > 0 ){
+//                System.out.println("kakao js key : " + session.users().getUserByUsername("admin", session.realms().getRealmByName("master")).getAttribute("tmax_kakao_api_key").get(0));
+                return session.users().getUserByUsername("admin", session.realms().getRealmByName("master")).getAttribute("tmax_kakao_api_key").get(0);
+            }
+            return null;
+        }
     }
 
 }

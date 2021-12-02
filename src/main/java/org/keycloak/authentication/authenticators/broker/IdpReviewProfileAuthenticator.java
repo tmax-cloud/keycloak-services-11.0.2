@@ -38,6 +38,8 @@ import org.keycloak.services.validation.Validation;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -59,6 +61,12 @@ public class IdpReviewProfileAuthenticator extends AbstractIdpAuthenticator {
         if (requiresUpdateProfilePage(context, userCtx, brokerContext)) {
 
             logger.debugf("Identity provider '%s' requires update profile action for broker user '%s'.", idpConfig.getAlias(), userCtx.getUsername());
+
+            //FIXME: by taegeon_woo
+            context.getAuthenticationSession().setAuthNote("isBrokerLogin", "true");
+            context.getAuthenticationSession().setAuthNote("brokerVendor", brokerContext.getIdpConfig().getAlias());
+            context.getAuthenticationSession().setAuthNote("brokerEmail", userCtx.getEmail());
+            //FIXME: by taegeon_woo
 
             // No formData for first render. The profile is rendered from userCtx
             Response challengeResponse = context.form()
@@ -112,8 +120,25 @@ public class IdpReviewProfileAuthenticator extends AbstractIdpAuthenticator {
 
         String username = realm.isRegistrationEmailAsUsername() ? formData.getFirst(UserModel.EMAIL) : formData.getFirst(UserModel.USERNAME);
         userCtx.setUsername(username);
-        userCtx.setFirstName(formData.getFirst(UserModel.FIRST_NAME));
-        userCtx.setLastName(formData.getFirst(UserModel.LAST_NAME));
+        //FIXME : by taegeon_woo
+        //for SNS Validation
+        if (formData != null){
+            if(formData.getFirst("user_name") != null) {
+                userCtx.setAttribute("user_name", Collections.singletonList(formData.getFirst("user_name")));
+            }
+
+            if(formData.getFirst("agreeMailOpt") != null) {
+                userCtx.setAttribute("agreeMailOpt", Collections.singletonList(formData.getFirst("agreeMailOpt")));
+            }
+
+            if(formData.getFirst("under_14") != null) {
+                userCtx.setAttribute("under_14", Collections.singletonList(formData.getFirst("under_14")));
+            }
+        }
+
+//        userCtx.setFirstName(formData.getFirst(UserModel.FIRST_NAME));
+//        userCtx.setLastName(formData.getFirst(UserModel.LAST_NAME));
+        //FIXME : by taegeon_woo
 
         String email = formData.getFirst(UserModel.EMAIL);
         if (!ObjectUtil.isEqualOrBothNull(email, userCtx.getEmail())) {

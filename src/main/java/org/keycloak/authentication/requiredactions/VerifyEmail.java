@@ -71,6 +71,10 @@ public class VerifyEmail implements RequiredActionProvider, RequiredActionFactor
 
         LoginFormsProvider loginFormsProvider = context.form();
         Response challenge;
+        // FIXME : by taegeon_woo
+        System.out.println("[VerifyEmail] userEmail : " + context.getUser().getEmail());
+        context.form().setAttribute("email", context.getUser().getEmail());
+        // FIXME : by taegeon_woo
 
         // Do not allow resending e-mail by simple page refresh, i.e. when e-mail sent, it should be resent properly via email-verification endpoint
         if (! Objects.equals(authSession.getAuthNote(Constants.VERIFY_EMAIL_KEY), email)) {

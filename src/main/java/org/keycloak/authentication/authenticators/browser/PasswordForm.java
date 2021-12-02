@@ -17,8 +17,10 @@
 
 package org.keycloak.authentication.authenticators.browser;
 
+import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.CredentialValidator;
+import org.keycloak.authentication.authenticators.broker.IdpReviewProfileAuthenticator;
 import org.keycloak.credential.CredentialProvider;
 import org.keycloak.credential.PasswordCredentialProvider;
 import org.keycloak.forms.login.LoginFormsProvider;
@@ -36,8 +38,27 @@ public class PasswordForm extends UsernamePasswordForm implements CredentialVali
         return validatePassword(context, context.getUser(), formData, false);
     }
 
+    private static final Logger logger = Logger.getLogger(PasswordForm.class);
+
     @Override
     public void authenticate(AuthenticationFlowContext context) {
+        // FIXME :  delete
+        if(context.getAuthenticationSession().getAuthNote("selection")!= null) {
+            logger.debug(" context.getAuthenticationSession().getAuthNote(\"selection\") : " + context.getAuthenticationSession().getAuthNote("selection"));
+            if (!context.getAuthenticationSession().getAuthNote("selection").equals("password")){
+                context.success();
+                return;
+            }
+        }
+
+        if ( context.getAuthenticationSession().getAuthNote("isBrokerLogin") != null
+                && context.getAuthenticationSession().getAuthNote("isBrokerLogin").equalsIgnoreCase("true") ){
+            logger.info("From broker login!!!!");
+            context.form().setAttribute("isBrokerLogin", "true");
+        }
+        context.form().setAttribute("email", context.getUser().getEmail());
+
+        // FIXME :  delete
         Response challengeResponse = context.form().createLoginPassword();
         context.challenge(challengeResponse);
     }

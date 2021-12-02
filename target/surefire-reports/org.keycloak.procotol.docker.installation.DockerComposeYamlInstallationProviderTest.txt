@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: org.keycloak.procotol.docker.installation.DockerComposeYamlInstallationProviderTest
 -------------------------------------------------------------------------------
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 1, Time elapsed: 0.471 s - in org.keycloak.procotol.docker.installation.DockerComposeYamlInstallationProviderTest
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 1, Time elapsed: 0.333 s - in org.keycloak.procotol.docker.installation.DockerComposeYamlInstallationProviderTest

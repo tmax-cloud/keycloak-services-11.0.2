@@ -17,16 +17,20 @@
 
 package org.keycloak.authentication.authenticators.browser;
 
+import okhttp3.Challenge;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
+import org.jboss.resteasy.spi.HttpRequest;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.forms.login.LoginFormsProvider;
+import org.keycloak.models.Constants;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
+import org.keycloak.services.messages.Messages;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -40,6 +44,35 @@ public class UsernamePasswordForm extends AbstractUsernameFormAuthenticator impl
 
     @Override
     public void action(AuthenticationFlowContext context) {
+
+        //FIXME: by taegeon_woo
+        HttpRequest request = context.getHttpRequest();
+        if ( request.getDecodedFormParameters()!= null && request.getDecodedFormParameters().getFirst("isBrokerLogin")!= null ) {
+            log.debug("From Info PopUp!!!!");
+            context.success();
+            return;
+        }
+
+        if ( context.getAuthenticationSession().getAuthNote("isBrokerLogin") != null
+                && context.getAuthenticationSession().getAuthNote("isBrokerLogin").equalsIgnoreCase("true") ){
+            log.debug("From broker login!!!!");
+            context.form().setAttribute("isBrokerLogin", "true");
+        }
+        if (context.getUser() != null){
+            context.form().setAttribute("email", context.getUser().getEmail());
+        }
+
+        if ( request.getDecodedFormParameters()!= null && request.getDecodedFormParameters().getFirst(AuthenticationManager.FORM_REMEMBER_EMAIL)!= null
+                && request.getDecodedFormParameters().getFirst(AuthenticationManager.FORM_REMEMBER_EMAIL).equalsIgnoreCase("on")
+                && request.getDecodedFormParameters().getFirst(AuthenticationManager.FORM_USERNAME)!= null
+                && request.getDecodedFormParameters().getFirst(AuthenticationManager.FORM_USERNAME) != "") {
+            AuthenticationManager.createRememberEmailCookie(context.getRealm(), request.getDecodedFormParameters().getFirst(AuthenticationManager.FORM_USERNAME), context.getUriInfo(), context.getConnection());
+            context.form().setAttribute(AuthenticationManager.FORM_REMEMBER_EMAIL, request.getDecodedFormParameters().getFirst(AuthenticationManager.FORM_USERNAME));
+        } else{
+            AuthenticationManager.expireRememberEmailCookie(context.getRealm(), context.getUriInfo(), context.getConnection());
+        }
+        //FIXME: by taegeon_woo
+
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         if (formData.containsKey("cancel")) {
             context.cancelLogin();
@@ -48,6 +81,25 @@ public class UsernamePasswordForm extends AbstractUsernameFormAuthenticator impl
         if (!validateForm(context, formData)) {
             return;
         }
+
+        //FIXME: by taegeon_woo
+        if ( context.getAuthenticationSession().getAuthNote("isBrokerLogin") != null
+                && context.getAuthenticationSession().getAuthNote("isBrokerLogin").equalsIgnoreCase("true") ){
+            log.debug("From broker login!! direct to LinkSuccess Page");
+            String accessCode = context.generateAccessCode();
+            Response challenge = context.form().setStatus(Response.Status.OK)
+                    .setSuccess(Messages.IDENTITY_PROVIDER_LINK_SUCCESS, context.getAuthenticationSession().getAuthNote("brokerVendor"), context.getAuthenticationSession().getAuthNote("brokerEmail"))
+                    .setAttribute(Constants.SKIP_LINK, true)
+                    .setAttribute(Constants.TEMPLATE_ATTR_ACTION_URI, context.getActionUrl(accessCode))
+                    .setAttribute("identityProviderVendor", context.getAuthenticationSession().getAuthNote("brokerVendor"))
+                    .setAttribute("identityProviderUserName", context.getAuthenticationSession().getAuthNote("brokerEmail"))
+                    .setAttribute("hyperauthUserName", context.getUser().getEmail())
+                    .createInfoPage();
+            context.challenge(challenge);
+            return;
+        }
+        //FIXME: by taegeon_woo
+
         context.success();
     }
 
@@ -70,6 +122,15 @@ public class UsernamePasswordForm extends AbstractUsernameFormAuthenticator impl
                 formData.add("rememberMe", "on");
             }
         }
+
+        //FIXME: by taegeon_woo
+        String remeberEmailUsername = AuthenticationManager.getRememberEmailUsername(context.getRealm(), context.getHttpRequest().getHttpHeaders());
+        if (remeberEmailUsername != null) {
+            log.debug("remeberEmailUsername :" + remeberEmailUsername);
+            context.form().setAttribute(AuthenticationManager.FORM_REMEMBER_EMAIL, remeberEmailUsername);
+        }
+        //FIXME: by taegeon_woo
+
         Response challengeResponse = challenge(context, formData);
         context.challenge(challengeResponse);
     }

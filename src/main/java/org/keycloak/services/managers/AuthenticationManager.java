@@ -129,6 +129,11 @@ public class AuthenticationManager {
     // used solely to determine is user is logged in
     public static final String KEYCLOAK_SESSION_COOKIE = "KEYCLOAK_SESSION";
     public static final String KEYCLOAK_REMEMBER_ME = "KEYCLOAK_REMEMBER_ME";
+    //FIXME: by taegeon_woo
+    public static final String HYPERAUTH_REMEMBER_EMAIL = "HYPERAUTH_REMEMBER_EMAIL";
+    public static final String FORM_REMEMBER_EMAIL = "rememberEmail";
+    //FIXME: by taegeon_woo
+
     public static final String KEYCLOAK_LOGOUT_PROTOCOL = "KEYCLOAK_LOGOUT_PROTOCOL";
     private static final TokenTypeCheck VALIDATE_IDENTITY_COOKIE = new TokenTypeCheck(TokenUtil.TOKEN_TYPE_KEYCLOAK_ID);
 
@@ -790,6 +795,14 @@ public class AuthenticationManager {
             expireRememberMeCookie(realm, uriInfo, clientConnection);
         }
 
+//        //FIXME: by taegeon_woo
+//        if ( request.getDecodedFormParameters()!= null && request.getDecodedFormParameters().getFirst(FORM_REMEMBER_EMAIL)!= null
+//                && request.getDecodedFormParameters().getFirst(FORM_REMEMBER_EMAIL).equalsIgnoreCase("on")){
+//            createRememberEmailCookie(realm, userSession.getLoginUsername(), uriInfo, clientConnection);
+//        }
+//        //FIXME: by taegeon_woo
+
+
         AuthenticatedClientSessionModel clientSession = clientSessionCtx.getClientSession();
 
         // Update userSession note with authTime. But just if flag SSO_AUTH is not set
@@ -1337,4 +1350,36 @@ public class AuthenticationManager {
         return null;
     }
 
+
+    //FIXME: by taegeon_woo
+    public static void createRememberEmailCookie(RealmModel realm, String username, UriInfo uriInfo, ClientConnection connection) {
+        logger.debug("Create rememberEmail cookie");
+        String path = getIdentityCookiePath(realm, uriInfo);
+        boolean secureOnly = realm.getSslRequired().isRequired(connection);
+        // remember me cookie should be persistent (hardcoded to 365 days for now)
+        //NewCookie cookie = new NewCookie(KEYCLOAK_REMEMBER_ME, "true", path, null, null, realm.getCentralLoginLifespan(), secureOnly);// todo httponly , true);
+        CookieHelper.addCookie(HYPERAUTH_REMEMBER_EMAIL, "username:" + username, path, null, null, 31536000, secureOnly, true);
+    }
+
+    public static String getRememberEmailUsername(RealmModel realm, HttpHeaders headers) {
+        if (realm.isRememberMe()) {
+            Cookie cookie = headers.getCookies().get(AuthenticationManager.HYPERAUTH_REMEMBER_EMAIL);
+            if (cookie != null) {
+                String value = cookie.getValue();
+                String[] s = value.split(":");
+                if (s[0].equals("username") && s.length == 2) {
+                    return s[1];
+                }
+            }
+        }
+        return null;
+    }
+
+    public static void expireRememberEmailCookie(RealmModel realm, UriInfo uriInfo, ClientConnection connection) {
+        logger.debug("Expiring rememberEmail cookie");
+        String path = getIdentityCookiePath(realm, uriInfo);
+        String cookieName = HYPERAUTH_REMEMBER_EMAIL;
+        expireCookie(realm, cookieName, path, true, connection, null);
+    }
+    //FIXME: by taegeon_woo
 }

@@ -84,6 +84,17 @@ public class AccountBean {
         return profileFormData != null ?  profileFormData.getFirst("email") :user.getEmail();
     }
 
+    //FIXME: by taegeon_woo
+    public String getUserNameAttr() {
+        String userName = "";
+        if (user.getAttribute("user_name")!= null && user.getAttribute("user_name").size() > 0
+                && user.getAttribute("user_name").get(0) != null){
+            userName = user.getAttribute("user_name").get(0);
+        }
+        return profileFormData != null ?  profileFormData.getFirst("userNameAttr") : userName;
+    }
+    //FIXME: by taegeon_woo
+
     public Map<String, String> getAttributes() {
         return attributes;
     }

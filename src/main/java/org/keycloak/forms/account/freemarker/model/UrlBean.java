@@ -50,6 +50,13 @@ public class UrlBean {
         return Urls.accountPage(baseQueryURI, realm).toString();
     }
 
+    //FIXME : by taegeon_woo
+    public String getAdditionalAuthUrl() {
+        return Urls.accountAdditionalAuthPage(baseQueryURI, realm).toString();
+    }
+    public String getAgreementUrl() { return Urls.accountAgreementPage(baseQueryURI, realm).toString(); }
+    //FIXME : by taegeon_woo
+
     public String getPasswordUrl() {
         return Urls.accountPasswordPage(baseQueryURI, realm).toString();
     }
@@ -99,4 +106,11 @@ public class UrlBean {
         URI uri = Urls.themeRoot(baseURI);
         return uri.getPath() + "/common/keycloak";
     }
+
+    //FIXME : by taegeon_woo
+    public String getSelectedTheme() {
+        return theme.getName();
+    }
+    //FIXME : by taegeon_woo
+
 }

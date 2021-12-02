@@ -62,6 +62,10 @@ public class Messages {
 
     public static final String NOTMATCH_PASSWORD = "notMatchPasswordMessage";
 
+    //FIXME : by taegeon_woo
+    public static final String SAME_PASSWORD = "samePasswordMessage";
+    //FIXME : by taegeon_woo
+
     public static final String INVALID_PASSWORD_EXISTING = "invalidPasswordExistingMessage";
 
     public static final String INVALID_PASSWORD_CONFIRM = "invalidPasswordConfirmMessage";

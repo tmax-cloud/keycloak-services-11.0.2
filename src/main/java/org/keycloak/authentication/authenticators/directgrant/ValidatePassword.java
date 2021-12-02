@@ -27,6 +27,7 @@ import org.keycloak.models.UserCredentialModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.services.managers.BruteForceProtector;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -52,6 +53,17 @@ public class ValidatePassword extends AbstractDirectGrantAuthenticator {
             context.failure(AuthenticationFlowError.INVALID_USER, challengeResponse);
             return;
         }
+
+        //FIXME: by taegeon_woo ( Issue : 273313)
+        RealmModel realm = context.getSession().getContext().getRealm();
+        if (realm.isBruteForceProtected()) {
+            UserModel user = context.getUser();
+            if (user != null) {
+                BruteForceProtector bruteForceProtector = context.getSession().getProvider(BruteForceProtector.class);
+                bruteForceProtector.successfulLogin(realm, user, context.getSession().getContext().getConnection());
+            }
+        }
+        //FIXME: by taegeon_woo
 
         context.success();
     }
