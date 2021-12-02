@@ -62,8 +62,7 @@ nbproject
 
 # Maven #
 #########
-target
-target/*
+.target
 
 # Maven shade
 #############
