@@ -1128,17 +1128,20 @@ public class RealmAdminResource {
      *
      * @param exportGroupsAndRoles
      * @param exportClients
+     * @param exportUsers
      * @return
      */
     @Path("partial-export")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public RealmRepresentation partialExport(@QueryParam("exportGroupsAndRoles") Boolean exportGroupsAndRoles,
-                                                     @QueryParam("exportClients") Boolean exportClients) {
+                                                     @QueryParam("exportClients") Boolean exportClients,
+                                                        @QueryParam("exportUsers") Boolean exportUsers ) {
         auth.realm().requireViewRealm();
 
         boolean groupsAndRolesExported = exportGroupsAndRoles != null && exportGroupsAndRoles;
         boolean clientsExported = exportClients != null && exportClients;
+        boolean usersExported = exportUsers != null && exportUsers;
 
         if (groupsAndRolesExported) {
             auth.groups().requireList();
@@ -1146,13 +1149,23 @@ public class RealmAdminResource {
         if (clientsExported) {
             auth.clients().requireView();
         }
+        //FIXME : by taegeon_woo
+        if (usersExported){
+            auth.users().requireView();
+        }
+        //FIXME : by taegeon_woo
 
         // service accounts are exported if the clients are exported
         // this means that if clients is true but groups/roles is false the service account is exported without roles
         // the other option is just include service accounts if clientsExported && groupsAndRolesExported
-        ExportOptions options = new ExportOptions(false, clientsExported, groupsAndRolesExported, clientsExported);
-        RealmRepresentation rep = ExportUtils.exportRealm(session, realm, options, false);
-        return stripForExport(session, rep);
+        //FIXME : by taegeon_woo
+        ExportOptions options = new ExportOptions(usersExported, clientsExported, groupsAndRolesExported, clientsExported);
+        RealmRepresentation rep = ExportUtils.exportRealm(session, realm, options, true);
+//        ExportOptions options = new ExportOptions(false, clientsExported, groupsAndRolesExported, clientsExported);
+//        RealmRepresentation rep = ExportUtils.exportRealm(session, realm, options, false);
+//        return stripForExport(session, rep);
+        //FIXME : by taegeon_woo
+        return rep;
     }
 
     /**

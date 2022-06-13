@@ -916,6 +916,13 @@ public class AuthenticationManager {
         ClientSessionContext clientSessionCtx = AuthenticationProcessor.attachSession(authSession, userSession, session, realm, clientConnection, event);
         userSession = clientSessionCtx.getClientSession().getUserSession();
 
+        //FIXME: by taegeon_woo
+        if(authSession.getAuthNote("passwordUpdateSkip") != null && authSession.getAuthNote("passwordUpdateSkip").equals("t")){
+            logger.info("reCreate UPDATE_PASSWORD required action");
+            userSession.getUser().addRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD);
+        }
+        //FIXME: by taegeon_woo
+
         event.event(EventType.LOGIN);
         event.session(userSession);
         event.success();

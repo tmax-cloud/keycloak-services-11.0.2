@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
+import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 
 import org.apache.commons.lang.StringUtils;
@@ -66,8 +67,10 @@ public class DefaultHttpClientFactoryTest {
 		}
 		assertEquals(HttpStatus.SC_OK,response.getStatusLine().getStatusCode());
 	}
-
-	@Test(expected = SSLPeerUnverifiedException.class)
+	//	FIXME : By taegeon_woo
+//	@Test(expected = SSLPeerUnverifiedException.class)
+	@Test(expected = SSLHandshakeException.class)
+	//	FIXME : By taegeon_woo
 	public void createHttpClientProviderWithUnvailableURL() throws IOException {
 		DefaultHttpClientFactory factory = new DefaultHttpClientFactory();
 		factory.init(scope(new HashMap<>()));

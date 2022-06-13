@@ -79,16 +79,42 @@ public class UpdatePassword implements RequiredActionProvider, RequiredActionFac
 
     @Override
     public void requiredActionChallenge(RequiredActionContext context) {
-        Response challenge = context.form()
-                .setAttribute("username", context.getAuthenticationSession().getAuthenticatedUser().getUsername())
-                .createResponse(UserModel.RequiredAction.UPDATE_PASSWORD);
+        //FIXME: by taegeon_woo
+        logger.info("User [ " + context.getUser().getUsername() + " ] Need to Update Password");
+        Response challenge = context.form().createForm("login-update-password-choose.ftl");
         context.challenge(challenge);
+//        Response challenge = context.form()
+//                .setAttribute("username", context.getAuthenticationSession().getAuthenticatedUser().getUsername())
+//                .createResponse(UserModel.RequiredAction.UPDATE_PASSWORD);
+//        context.challenge(challenge);
+        //FIXME: by taegeon_woo
     }
 
     @Override
     public void processAction(RequiredActionContext context) {
         EventBuilder event = context.getEvent();
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+
+        //FIXME: by taegeon_woo
+        String skip = formData.getFirst("passwordUpdateSkip");
+        if (skip != null && skip.equalsIgnoreCase("t")) {
+            // 다음에 변경하기 클릭시
+            logger.info("User [ " + context.getUser().getUsername() + " ] Skip Password Update !");
+            logger.info("User [ " + context.getUser().getUsername() + " ] Ask Again Later");
+            context.getAuthenticationSession().setAuthNote("passwordUpdateSkip", "t");
+            context.success();
+            return;
+
+        } else if (skip != null && skip.equalsIgnoreCase("f")){
+            // 변경하기 클릭시, 비밀번호 변경 페이지를 던진다.
+            Response challenge = context.form()
+                .setAttribute("username", context.getAuthenticationSession().getAuthenticatedUser().getUsername())
+                .createResponse(UserModel.RequiredAction.UPDATE_PASSWORD);
+            context.challenge(challenge);
+            return;
+        }
+        //FIXME: by taegeon_woo
+
         event.event(EventType.UPDATE_PASSWORD);
         String passwordNew = formData.getFirst("password-new");
         String passwordConfirm = formData.getFirst("password-confirm");
@@ -147,7 +173,8 @@ public class UpdatePassword implements RequiredActionProvider, RequiredActionFac
             return;
         }
     }
-
+    
+    //FIXME : by taegeon_woo
     private boolean sameWithOldPW(KeycloakSession session, String username, String password) {
         UserCredentialModel cred = UserCredentialModel.password(password);
         if (session.userCredentialManager().isValid(session.getContext().getRealm(), session.users().getUserByUsername(username, session.getContext().getRealm()), cred)) {
@@ -156,6 +183,7 @@ public class UpdatePassword implements RequiredActionProvider, RequiredActionFac
             return false;
         }
     }
+    //FIXME : by taegeon_woo
 
     @Override
     public void close() {
