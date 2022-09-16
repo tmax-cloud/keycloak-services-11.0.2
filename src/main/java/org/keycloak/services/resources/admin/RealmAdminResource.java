@@ -1129,6 +1129,7 @@ public class RealmAdminResource {
      * @param exportGroupsAndRoles
      * @param exportClients
      * @param exportUsers
+     * @param includeUserCredentials
      * @return
      */
     @Path("partial-export")
@@ -1136,12 +1137,14 @@ public class RealmAdminResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RealmRepresentation partialExport(@QueryParam("exportGroupsAndRoles") Boolean exportGroupsAndRoles,
                                                      @QueryParam("exportClients") Boolean exportClients,
-                                                        @QueryParam("exportUsers") Boolean exportUsers ) {
+                                                        @QueryParam("exportUsers") Boolean exportUsers,
+                                                            @QueryParam("includeUserCredentials") Boolean includeUserCredentials) {
         auth.realm().requireViewRealm();
 
         boolean groupsAndRolesExported = exportGroupsAndRoles != null && exportGroupsAndRoles;
         boolean clientsExported = exportClients != null && exportClients;
         boolean usersExported = exportUsers != null && exportUsers;
+        boolean userCredentialsIncluded = includeUserCredentials != null && includeUserCredentials && usersExported;
 
         if (groupsAndRolesExported) {
             auth.groups().requireList();
@@ -1160,7 +1163,7 @@ public class RealmAdminResource {
         // the other option is just include service accounts if clientsExported && groupsAndRolesExported
         //FIXME : by taegeon_woo
         ExportOptions options = new ExportOptions(usersExported, clientsExported, groupsAndRolesExported, clientsExported);
-        RealmRepresentation rep = ExportUtils.exportRealm(session, realm, options, true);
+        RealmRepresentation rep = ExportUtils.exportRealm(session, realm, options, userCredentialsIncluded);
 //        ExportOptions options = new ExportOptions(false, clientsExported, groupsAndRolesExported, clientsExported);
 //        RealmRepresentation rep = ExportUtils.exportRealm(session, realm, options, false);
 //        return stripForExport(session, rep);

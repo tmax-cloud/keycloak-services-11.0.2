@@ -57,7 +57,12 @@ public class UpdatePassword implements RequiredActionProvider, RequiredActionFac
     @Override
     public void evaluateTriggers(RequiredActionContext context) {
         int daysToExpirePassword = context.getRealm().getPasswordPolicy().getDaysToExpirePassword();
-        if(daysToExpirePassword != -1) {
+        //FIXME: by taegeon_woo
+//        if(daysToExpirePassword != -1) {
+        if(daysToExpirePassword != -1
+                && !(context.getAuthenticationSession().getAuthNote("passwordUpdateSkip") != null
+                        && context.getAuthenticationSession().getAuthNote("passwordUpdateSkip").equalsIgnoreCase("t"))) {
+        //FIXME: by taegeon_woo
             PasswordCredentialProvider passwordProvider = (PasswordCredentialProvider)context.getSession().getProvider(CredentialProvider.class, PasswordCredentialProviderFactory.PROVIDER_ID);
             CredentialModel password = passwordProvider.getPassword(context.getRealm(), context.getUser());
             if (password != null) {
@@ -110,6 +115,9 @@ public class UpdatePassword implements RequiredActionProvider, RequiredActionFac
             Response challenge = context.form()
                 .setAttribute("username", context.getAuthenticationSession().getAuthenticatedUser().getUsername())
                 .createResponse(UserModel.RequiredAction.UPDATE_PASSWORD);
+            if(context.getAuthenticationSession().getAuthNote("passwordUpdateSkip") != null){
+                context.getAuthenticationSession().removeAuthNote("passwordUpdateSkip");
+            }
             context.challenge(challenge);
             return;
         }
