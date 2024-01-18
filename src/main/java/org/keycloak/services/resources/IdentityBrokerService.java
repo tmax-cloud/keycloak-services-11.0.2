@@ -668,12 +668,6 @@ public class IdentityBrokerService implements IdentityProvider.AuthenticationCal
 
             event.detail(Details.IDENTITY_PROVIDER, providerId);
             event.detail(Details.IDENTITY_PROVIDER_USERNAME, context.getUsername());
-
-            logger.debug("context id = " + context.getId());
-            logger.debug("context username = " + context.getUsername());
-            logger.debug("context email = " + context.getEmail());
-            logger.debug("context firstName = " + context.getFirstName());
-            logger.debug("context lastName = " + context.getLastName());
             // Ensure the first-broker-login flow was successfully finished
             String authProvider = authSession.getAuthNote(AbstractIdpAuthenticator.FIRST_BROKER_LOGIN_SUCCESS);
             if (authProvider == null || !authProvider.equals(providerId)) {
@@ -693,10 +687,6 @@ public class IdentityBrokerService implements IdentityProvider.AuthenticationCal
             logger.debug("federatedUser email = " + federatedUser.getEmail());
             logger.debug("federatedUser firstName = " + federatedUser.getFirstName());
             logger.debug("federatedUser lastName = " + federatedUser.getLastName());
-
-            federatedUser.setFirstName("base code test");
-            federatedUser.setLastName("base code test");
-
             // Update user attributes from broker context
             logger.debug("user first/last name updated = " + federatedUser.getFirstName() + " " + federatedUser.getLastName());
 

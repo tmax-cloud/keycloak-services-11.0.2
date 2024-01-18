@@ -196,14 +196,17 @@ public class FreeMarkerLoginFormsProvider implements LoginFormsProvider {
 
         switch (page) {
             case LOGIN_CONFIG_TOTP:
+                logger.debug("Configure Totp form");
                 attributes.put("totp", new TotpBean(session, realm, user, uriInfo.getRequestUriBuilder()));
                 break;
             case LOGIN_UPDATE_PROFILE:
+                logger.debug("Update profile form");
                 UpdateProfileContext userCtx = (UpdateProfileContext) attributes.get(LoginFormsProvider.UPDATE_PROFILE_CONTEXT_ATTR);
                 attributes.put("user", new ProfileBean(userCtx, formData));
                 break;
             case LOGIN_IDP_LINK_CONFIRM:
             case LOGIN_IDP_LINK_EMAIL:
+                logger.debug("Link identity provider form");
                 BrokeredIdentityContext brokerContext = (BrokeredIdentityContext) this.attributes.get(IDENTITY_PROVIDER_BROKER_CONTEXT);
                 String idpAlias = brokerContext.getIdpConfig().getAlias();
                 idpAlias = ObjectUtil.capitalize(idpAlias);
@@ -215,6 +218,7 @@ public class FreeMarkerLoginFormsProvider implements LoginFormsProvider {
                 attributes.put("otpLogin", new TotpLoginBean(session, realm, user, (String) this.attributes.get(OTPFormAuthenticator.SELECTED_OTP_CREDENTIAL_ID)));
                 break;
             case REGISTER:
+                logger.debug("Register form");
                 attributes.put("register", new RegisterBean(formData));
                 break;
             case OAUTH_GRANT:
@@ -238,6 +242,7 @@ public class FreeMarkerLoginFormsProvider implements LoginFormsProvider {
     
     @Override
     public Response createForm(String form) {
+        logger.debug("Create form: {}", new String[]{form});
         Theme theme;
         try {
             theme = getTheme();

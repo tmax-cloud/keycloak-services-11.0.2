@@ -136,8 +136,9 @@ public class IdpReviewProfileAuthenticator extends AbstractIdpAuthenticator {
             }
         }
 
-//        userCtx.setFirstName(formData.getFirst(UserModel.FIRST_NAME));
-//        userCtx.setLastName(formData.getFirst(UserModel.LAST_NAME));
+        logger.debug("set first name and lastname from idp review");
+        userCtx.setFirstName(formData.getFirst(UserModel.FIRST_NAME));
+        userCtx.setLastName(formData.getFirst(UserModel.LAST_NAME));
         //FIXME : by taegeon_woo
 
         String email = formData.getFirst(UserModel.EMAIL);
