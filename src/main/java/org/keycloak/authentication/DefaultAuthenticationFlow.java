@@ -160,8 +160,12 @@ public class DefaultAuthenticationFlow implements AuthenticationFlow {
         authenticator.action(result);
         Response response = processResult(result, true);
         if (response == null) {
+            logger.debug("response is null");
             return continueAuthenticationAfterSuccessfulAction(model);
-        } else return response;
+        } else {
+            logger.debug("response is not null");
+            return response;
+        }
     }
 
 
@@ -479,6 +483,7 @@ public class DefaultAuthenticationFlow implements AuthenticationFlow {
     public Response processResult(AuthenticationProcessor.Result result, boolean isAction) {
         AuthenticationExecutionModel execution = result.getExecution();
         FlowStatus status = result.getStatus();
+        logger.debug("flow status: " + status + " for " + execution.getAuthenticator() + " isAction: " + isAction);
         switch (status) {
             case SUCCESS:
                 logger.debugv("authenticator SUCCESS: {0}", execution.getAuthenticator());
