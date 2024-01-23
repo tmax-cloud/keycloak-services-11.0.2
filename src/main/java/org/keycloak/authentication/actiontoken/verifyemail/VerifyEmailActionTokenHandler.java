@@ -99,13 +99,17 @@ public class VerifyEmailActionTokenHandler extends AbstractActionTokenHander<Ver
 
         event.success();
 
-        //FIXME: by taegeon_woo
+        //FIXME: by taegeon_woo 명확히 이유 파악은 아직 덜됐지만, tokenContext.isAuthenticationSessionFresh()가 true 인 경우는, 세션에든, 쿠키에든 sessionID가 남아있지 않아서 token context에 AuthentiactionSession을 수동으로 fresh 하게 set해주었을때 이고
+        //FIXME : 그런 경우에 이메일 인증 완료 페이지가 뜨게끔 되어있는데 ( 아마도 이메일 인증을 아예 다른 컴퓨터에서 할 가능성도 있음 --> 이 경우에 시간이 흘렀던, 다른 기기에 의해서든 authentication session은 없을 가능성이 높음.
+        //FIXME : 다른 required action은 제대로 동작하지 않을 가능성 여전히 내포함.
         token.setCompoundOriginalAuthenticationSessionId(token.getCompoundAuthenticationSessionId());
         //FIXME: by taegeon_woo
 
         if (token.getCompoundOriginalAuthenticationSessionId() != null) {
-            AuthenticationSessionManager asm = new AuthenticationSessionManager(tokenContext.getSession());
-            asm.removeAuthenticationSession(tokenContext.getRealm(), authSession, true);
+            //FIXME: by taegeon_woo
+//            AuthenticationSessionManager asm = new AuthenticationSessionManager(tokenContext.getSession());
+//            asm.removeAuthenticationSession(tokenContext.getRealm(), authSession, true);
+            //FIXME: by taegeon_woo
 
             return tokenContext.getSession().getProvider(LoginFormsProvider.class)
                     .setAuthenticationSession(authSession)
