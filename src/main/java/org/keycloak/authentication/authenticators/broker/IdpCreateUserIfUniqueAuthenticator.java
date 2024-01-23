@@ -50,12 +50,70 @@ public class IdpCreateUserIfUniqueAuthenticator extends AbstractIdpAuthenticator
     @Override
     protected void authenticateImpl(AuthenticationFlowContext context, SerializedBrokeredIdentityContext serializedCtx, BrokeredIdentityContext brokerContext) {
 
+        System.out.println("IdpCreateUserIfUniqueAuthenticator.authenticateImpl");
+        logger.debug("initiate idpCreateUserIfUnique authenticator");
         KeycloakSession session = context.getSession();
         RealmModel realm = context.getRealm();
 
         if (context.getAuthenticationSession().getAuthNote(EXISTING_USER_INFO) != null) {
             context.attempted();
             return;
+        }
+
+        if(context.getUser() != null){
+
+            if(context.getUser().getUsername() != null){
+                String authFlowCtxUserName = context.getUser().getUsername();
+                logger.debug("authFlowCtxUserName: " + authFlowCtxUserName);
+            }
+            if(context.getUser().getLastName() != null){
+                String authFlowCtxUserLastName = context.getUser().getLastName();
+                logger.debug("authFlowCtxUserLastName: " + authFlowCtxUserLastName);
+            }
+            if(context.getUser().getFirstName() != null){
+                String authFlowCtxUserFirstName = context.getUser().getFirstName();
+                logger.debug("authFlowCtxUserFirstName: " + authFlowCtxUserFirstName);
+            }
+            if(context.getUser().getEmail() != null){
+                String authFlowCtxUserEmail = context.getUser().getEmail();
+                logger.debug("authFlowCtxUserEmail: " + authFlowCtxUserEmail);
+            }
+        }else{
+            logger.debug("context.getUser() is null");
+        }
+
+        if (brokerContext.getUsername() != null){
+            String brokeredCtxUserName = brokerContext.getUsername();
+            logger.debug("brokeredCtxUserName: " + brokeredCtxUserName);
+        }
+        if (brokerContext.getLastName() != null){
+            String brokeredCtxUserLastName = brokerContext.getLastName();
+            logger.debug("brokeredCtxUserLastName: " + brokeredCtxUserLastName);
+        }
+        if (brokerContext.getFirstName() != null){
+            String brokeredCtxUserFirstName = brokerContext.getFirstName();
+            logger.debug("brokeredCtxUserFirstName: " + brokeredCtxUserFirstName);
+        }
+        if (brokerContext.getEmail() != null){
+            String brokeredCtxUserEmail = brokerContext.getEmail();
+            logger.debug("brokeredCtxUserEmail: " + brokeredCtxUserEmail);
+        }
+
+        if(serializedCtx.getUsername() != null){
+            String serializedCtxUserName = serializedCtx.getUsername();
+            logger.debug("serializedCtxUserName: " + serializedCtxUserName);
+        }
+        if(serializedCtx.getLastName() != null){
+            String serializedCtxUserLastName = serializedCtx.getLastName();
+            logger.debug("serializedCtxUserLastName: " + serializedCtxUserLastName);
+        }
+        if(serializedCtx.getFirstName() != null){
+            String serializedCtxUserFirstName = serializedCtx.getFirstName();
+            logger.debug("serializedCtxUserFirstName: " + serializedCtxUserFirstName);
+        }
+        if(serializedCtx.getEmail() != null){
+            String serializedCtxUserEmail = serializedCtx.getEmail();
+            logger.debug("serializedCtxUserEmail: " + serializedCtxUserEmail);
         }
 
         String username = getUsername(context, serializedCtx, brokerContext);
@@ -69,11 +127,19 @@ public class IdpCreateUserIfUniqueAuthenticator extends AbstractIdpAuthenticator
         ExistingUserInfo duplication = checkExistingUser(context, username, serializedCtx, brokerContext);
 
         if (duplication == null) {
-            logger.debugf("No duplication detected. Creating account for user '%s' and linking with identity provider '%s' .",
+            logger.debugf("No duplication detected!!! Creating account for user '%s' and linking with identity provider '%s' .",
                     username, brokerContext.getIdpConfig().getAlias());
 
             UserModel federatedUser = session.users().addUser(realm, username);
             federatedUser.setEnabled(true);
+
+            //TODO : serialize에서 username만 뺴고 federatedUser에 다 넣어주고 있따.
+            /*
+            federatedUser는 idp유저고 실제 유저는 userEntity인데 이 둘이 연결된다
+            userEntity에 last name, first name 을 넣어야 하는데 안들어가고 있고, federatedUser에 들어간 값이 나중에
+            userEntity에서 update쳐지는것
+            해결 -> 최초 USERENTITY에다 저장할때 넣어주고, UPDATE는 안해준다
+             */
 
             for (Map.Entry<String, List<String>> attr : serializedCtx.getAttributes().entrySet()) {
                 if (!UserModel.USERNAME.equalsIgnoreCase(attr.getKey())) {

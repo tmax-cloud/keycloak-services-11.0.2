@@ -81,6 +81,7 @@ import java.util.Objects;
 import java.util.Properties;
 
 import static org.keycloak.models.UserModel.RequiredAction.UPDATE_PASSWORD;
+import static org.keycloak.models.UserModel.RequiredAction.VERIFY_EMAIL;
 
 /**
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
@@ -113,6 +114,8 @@ public class FreeMarkerLoginFormsProvider implements LoginFormsProvider {
     protected FreeMarkerUtil freeMarker;
 
     protected UserModel user;
+
+    protected IdentityProviderModel identityProviderModel;
 
     protected final Map<String, Object> attributes = new HashMap<>();
 
@@ -196,14 +199,29 @@ public class FreeMarkerLoginFormsProvider implements LoginFormsProvider {
 
         switch (page) {
             case LOGIN_CONFIG_TOTP:
+                logger.debug("Configure Totp form");
                 attributes.put("totp", new TotpBean(session, realm, user, uriInfo.getRequestUriBuilder()));
                 break;
             case LOGIN_UPDATE_PROFILE:
+                logger.debug("Update profile form");
                 UpdateProfileContext userCtx = (UpdateProfileContext) attributes.get(LoginFormsProvider.UPDATE_PROFILE_CONTEXT_ATTR);
                 attributes.put("user", new ProfileBean(userCtx, formData));
+
+                logger.debug("emailAsUserName: " + realm.isRegistrationEmailAsUsername());
+                attributes.put("emailAsUserName", realm.isRegistrationEmailAsUsername());
+
+                logger.debug("editUserNameAllowed: " + realm.isEditUsernameAllowed());
+                attributes.put("editUserNameAllowed", realm.isEditUsernameAllowed());
+
+                if(identityProviderModel != null) { // if user is linked to an identity provider (for initial registration)
+                    attributes.put("providerId", identityProviderModel.getProviderId());
+                    logger.debug("insert providerId: " + identityProviderModel.getProviderId());
+                }
+
                 break;
             case LOGIN_IDP_LINK_CONFIRM:
             case LOGIN_IDP_LINK_EMAIL:
+                logger.debug("Link identity provider form");
                 BrokeredIdentityContext brokerContext = (BrokeredIdentityContext) this.attributes.get(IDENTITY_PROVIDER_BROKER_CONTEXT);
                 String idpAlias = brokerContext.getIdpConfig().getAlias();
                 idpAlias = ObjectUtil.capitalize(idpAlias);
@@ -215,6 +233,7 @@ public class FreeMarkerLoginFormsProvider implements LoginFormsProvider {
                 attributes.put("otpLogin", new TotpLoginBean(session, realm, user, (String) this.attributes.get(OTPFormAuthenticator.SELECTED_OTP_CREDENTIAL_ID)));
                 break;
             case REGISTER:
+                logger.debug("Register form");
                 attributes.put("register", new RegisterBean(formData));
                 break;
             case OAUTH_GRANT:
@@ -238,6 +257,7 @@ public class FreeMarkerLoginFormsProvider implements LoginFormsProvider {
     
     @Override
     public Response createForm(String form) {
+        logger.debug("Create form: {}", new String[]{form});
         Theme theme;
         try {
             theme = getTheme();
@@ -516,6 +536,17 @@ public class FreeMarkerLoginFormsProvider implements LoginFormsProvider {
             setMessage(MessageType.WARNING, Messages.UPDATE_PROFILE);
         }
 
+        return createResponse(LoginFormsPages.LOGIN_UPDATE_PROFILE);
+    }
+
+    @Override
+    public Response createUpdateProfilePage(IdentityProviderModel identityProvider) {
+        // Don't display initial message if we already have some errors
+        if (messageType != MessageType.ERROR) {
+            setMessage(MessageType.WARNING, Messages.UPDATE_PROFILE);
+        }
+        // set the identity provider model to be used in the template
+        this.identityProviderModel = identityProvider;
         return createResponse(LoginFormsPages.LOGIN_UPDATE_PROFILE);
     }
 

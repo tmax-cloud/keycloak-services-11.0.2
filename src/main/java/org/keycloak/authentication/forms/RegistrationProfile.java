@@ -39,6 +39,7 @@ import org.keycloak.services.validation.Validation;
 import javax.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:bill@burkecentral.com">Bill Burke</a>
@@ -59,11 +60,22 @@ public class RegistrationProfile implements FormAction, FormActionFactory {
 
     @Override
     public void validate(ValidationContext context) {
+
+        System.out.println("on resister profile validate");
+
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         List<FormMessage> errors = new ArrayList<>();
 
         context.getEvent().detail(Details.REGISTER_METHOD, "form");
         String eventError = Errors.INVALID_REGISTRATION;
+
+        for (Map.Entry<String, List<String>> forms : formData.entrySet()) {
+            System.out.println("key: " + forms.getKey());
+            for (String val : forms.getValue()) {
+                System.out.println("val: " + val);
+            }
+        }
+
 
         if (Validation.isBlank(formData.getFirst((RegistrationPage.FIELD_FIRST_NAME)))) {
             errors.add(new FormMessage(RegistrationPage.FIELD_FIRST_NAME, Messages.MISSING_FIRST_NAME));

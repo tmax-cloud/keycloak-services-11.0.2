@@ -72,7 +72,7 @@ public class IdpReviewProfileAuthenticator extends AbstractIdpAuthenticator {
             Response challengeResponse = context.form()
                     .setAttribute(LoginFormsProvider.UPDATE_PROFILE_CONTEXT_ATTR, userCtx)
                     .setFormData(null)
-                    .createUpdateProfilePage();
+                    .createUpdateProfilePage(idpConfig);
             context.challenge(challengeResponse);
         } else {
             // Not required to update profile. Marked success
@@ -136,9 +136,9 @@ public class IdpReviewProfileAuthenticator extends AbstractIdpAuthenticator {
             }
         }
 
-//        userCtx.setFirstName(formData.getFirst(UserModel.FIRST_NAME));
-//        userCtx.setLastName(formData.getFirst(UserModel.LAST_NAME));
-        //FIXME : by taegeon_woo
+        logger.debug("set first name and lastname from idp review");
+        userCtx.setFirstName(formData.getFirst(UserModel.FIRST_NAME));
+        userCtx.setLastName(formData.getFirst(UserModel.LAST_NAME));
 
         String email = formData.getFirst(UserModel.EMAIL);
         if (!ObjectUtil.isEqualOrBothNull(email, userCtx.getEmail())) {

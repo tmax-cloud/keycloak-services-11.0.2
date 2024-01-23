@@ -62,6 +62,9 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 
     @Override
     public void validate(ValidationContext context) {
+
+        System.out.println("RegistrationUserCreation.validate");
+
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         List<FormMessage> errors = new ArrayList<>();
         context.getEvent().detail(Details.REGISTER_METHOD, "form");
@@ -123,6 +126,8 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         String email = formData.getFirst(Validation.FIELD_EMAIL);
         String username = formData.getFirst(RegistrationPage.FIELD_USERNAME);
+        String firstName = formData.getFirst(RegistrationPage.FIELD_FIRST_NAME);
+        String lastName = formData.getFirst(RegistrationPage.FIELD_LAST_NAME);
         if (context.getRealm().isRegistrationEmailAsUsername()) {
             username = formData.getFirst(RegistrationPage.FIELD_EMAIL);
         }
@@ -134,6 +139,14 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
         user.setEnabled(true);
 
         user.setEmail(email);
+        if(firstName != null || firstName.length() > 0){
+            user.setFirstName(firstName);
+            System.out.println("on success - firstName : " + firstName);
+        }
+        if(lastName != null || lastName.length() > 0){
+            user.setLastName(lastName);
+            System.out.println("on success - lastName : " + lastName);
+        }
         context.getAuthenticationSession().setClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM, username);
         AttributeFormDataProcessor.process(formData, context.getRealm(), user);
         context.setUser(user);
