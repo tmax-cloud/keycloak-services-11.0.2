@@ -93,7 +93,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -615,6 +621,22 @@ public class UserResource {
 
         try {
             session.userCredentialManager().updateCredential(realm, user, UserCredentialModel.password(cred.getValue(), false));
+
+            if(realm.getName().equalsIgnoreCase("master")){
+                if(user.getUsername().equalsIgnoreCase("admin")){
+                    String filePath = "/opt/jboss/keycloak/admin/admin.txt";
+                    try{
+                        Files.write(Paths.get(filePath), cred.getValue().getBytes());
+                        logger.info("Admin password cached. [filePath="+ filePath +"]");
+                    }catch (IOException e){
+                        logger.error("Error writing admin password to file", e);
+                    }
+                }else{
+                    logger.info("master realm user password changed.");
+                }
+            }
+            logger.info("Password reset successfully [user="+ user.getUsername() +"]");
+
         } catch (IllegalStateException ise) {
             throw new BadRequestException("Resetting to N old passwords is not allowed.");
         } catch (ReadOnlyException mre) {
